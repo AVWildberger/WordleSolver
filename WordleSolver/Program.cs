@@ -1,13 +1,24 @@
 ﻿/* Author: André V. Wildberger *
  * Date: September 2023        */
+using System.Net;
+
 namespace WordleSolver
 {
     internal class Program
     {
-        static string file = "words.txt";
+        static string file = "..\\..\\..\\words.txt";
 
         static void Main()
         {
+            if (!File.Exists(file))
+            {
+                DownloadFile(file);
+            }
+
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("ATTENTION: English Wordle only!\n");
+            Console.ResetColor();
+
             char[] rightLettersInPlace = GetLettersInPlace();
             Console.WriteLine();
             char[] rightLetters = GetLetters(5);
@@ -20,30 +31,29 @@ namespace WordleSolver
             if (words.Length > 1)
             {
                 wrongLetters = GetLetters();
-
                 words = SearchWords(rightLettersInPlace, rightLetters, wrongLetters);
+
+                OutputWords(words);
             }
 
-            if (words.Length > 1)
+            Console.Write("\nDrücken Sie eine beliebige Taste zum beenden...");
+            Console.ReadKey(false);
+        }
+
+        /// <summary>
+        /// Outputs the words
+        /// </summary>
+        static void OutputWords(string[] words)
+        {
+            Console.WriteLine("Possible words are:\n");
+
+            for (int i = 0; i < words.Length; i++)
             {
-                Console.WriteLine("Possible words are:\n");
-                
-                for (int i = 0; i < words.Length; i++)
-                {
-                    Console.WriteLine(words[i].ToUpper());
-                }
-            }
-            else if (words.Length == 1)
-            {
-                Console.WriteLine($"Your word is: {words[0].ToUpper()}");
-            }
-            else
-            {
-                Console.WriteLine("Oh no! No words found with your filters!");
+                Console.WriteLine(words[i].ToUpper());
             }
 
-            Console.WriteLine("\nDrücken Sie eine beliebige Taste zum beenden...");
-            Console.ReadKey();
+            if (words.Length == 1) { Console.WriteLine($"Your word is: {words[0].ToUpper()}"); }
+            else if (words.Length == 0) { Console.WriteLine("Oh no! No words found with your filters!"); }
         }
 
         /// <summary>
@@ -179,6 +189,22 @@ namespace WordleSolver
             Console.WriteLine(char.ToLower(ch));
 
             return char.ToLower(ch);
+        }
+
+        /// <summary>
+        /// Downloads wordlist from my github profile
+        /// </summary>
+        /// <param name="path">wordlist</param>
+        static void DownloadFile(string path)
+        {
+            using (var client = new WebClient())
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("Downloading Wordlist...");
+                client.DownloadFile("https://raw.githubusercontent.com/AVWildberger/WordleSolver/25f52099ebccc77b71e443869a18b9bfcf4e4464/WordleSolver/words.txt", file);
+                Console.WriteLine("Download finished!\n");
+                Console.ResetColor();
+            }
         }
     }
 }
